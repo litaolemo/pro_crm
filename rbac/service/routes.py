@@ -44,10 +44,13 @@ def get_all_url_dict(ignore_namespace_list=None):
     md = import_string(settings.ROOT_URLCONF)
     urlpatterns = []
 
-    for item in md.urlpatterns:
-        if item.namespace in ignore_list:
-            continue
-        urlpatterns.append(item)
-
+    try:
+        for item in md.urlpatterns:
+            print(item)
+            if item.namespace in ignore_list:
+                continue
+            urlpatterns.append(item)
+    except:
+        pass
     recursion_urls(None, "/", urlpatterns, url_ordered_dict)
     return url_ordered_dict

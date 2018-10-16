@@ -25,7 +25,7 @@ class UserInfo(RbacUserInfo):
     )
     gender = models.IntegerField(verbose_name='性别',choices=gender_choices,default=1)
 
-    depart = models.ForeignKey(verbose_name='部门', to="Department")
+    depart = models.ForeignKey(verbose_name='部门', to="Department",on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -66,8 +66,8 @@ class ClassList(models.Model):
     如：
         Python全栈  面授班  5期  10000  2017-11-11  2018-5-11
     """
-    school = models.ForeignKey(verbose_name='校区', to='School')
-    course = models.ForeignKey(verbose_name='课程名称', to='Course')
+    school = models.ForeignKey(verbose_name='校区', to='School',on_delete=models.CASCADE)
+    course = models.ForeignKey(verbose_name='课程名称', to='Course',on_delete=models.CASCADE)
     semester = models.IntegerField(verbose_name="班级(期)") # 11
     price = models.IntegerField(verbose_name="学费")
     start_date = models.DateField(verbose_name="开班日期")
@@ -124,10 +124,11 @@ class Customer(models.Model):
         null=True,
         verbose_name="转介绍自学员",
         help_text="若此客户是转介绍自内部学员,请在此处选择内部学员姓名",
-        related_name="internal_referral"
+        related_name="internal_referral",
+        on_delete = models.CASCADE
     )
     course = models.ManyToManyField(verbose_name="咨询课程", to="Course")
-    consultant = models.ForeignKey(verbose_name="课程顾问", to='UserInfo', related_name='consultant', null=True, blank=True)
+    consultant = models.ForeignKey(verbose_name="课程顾问", to='UserInfo', related_name='consultant', null=True, blank=True,on_delete=models.CASCADE)
     education_choices = (
         (1, '重点大学'),
         (2, '普通本科'),
@@ -172,8 +173,8 @@ class ConsultRecord(models.Model):
     """
     客户跟进记录
     """
-    customer = models.ForeignKey(verbose_name="所咨询客户", to='Customer')
-    consultant = models.ForeignKey(verbose_name="跟踪人", to='UserInfo')
+    customer = models.ForeignKey(verbose_name="所咨询客户", to='Customer',on_delete=models.CASCADE)
+    consultant = models.ForeignKey(verbose_name="跟踪人", to='UserInfo',on_delete=models.CASCADE)
     date = models.DateField(verbose_name="跟进日期", auto_now_add=True)
     note = models.TextField(verbose_name="跟进内容")
 
@@ -182,9 +183,9 @@ class PaymentRecord(models.Model):
     """
     缴费记录
     """
-    customer = models.ForeignKey(Customer, verbose_name="客户")
-    consultant = models.ForeignKey(verbose_name="课程顾问", to='UserInfo', help_text="谁签的单就选谁")
-    class_list = models.ForeignKey(verbose_name="分配班级", to="ClassList", null=True, blank=True)
+    customer = models.ForeignKey(Customer, verbose_name="客户",on_delete=models.CASCADE)
+    consultant = models.ForeignKey(verbose_name="课程顾问", to='UserInfo', help_text="谁签的单就选谁",on_delete=models.CASCADE)
+    class_list = models.ForeignKey(verbose_name="分配班级", to="ClassList", null=True, blank=True,on_delete=models.CASCADE)
     pay_type_choices = [
         (1, "报名费"),
         (2, "学费"),
@@ -201,7 +202,7 @@ class PaymentRecord(models.Model):
     status = models.IntegerField(verbose_name='审核',default=1,choices=status_choices)
 
     confirm_date = models.DateTimeField(verbose_name="确认日期", null=True, blank=True)
-    confirm_user = models.ForeignKey(verbose_name="确认人", to='UserInfo', related_name='confirms', null=True, blank=True)
+    confirm_user = models.ForeignKey(verbose_name="确认人", to='UserInfo', related_name='confirms', null=True, blank=True,on_delete=models.CASCADE)
 
     note = models.TextField(verbose_name="备注", blank=True, null=True)
     apply_date = models.DateTimeField(verbose_name="申请日期", auto_now_add=True)
@@ -211,7 +212,7 @@ class Student(models.Model):
     """
     学生表（已报名）
     """
-    customer = models.OneToOneField(verbose_name='客户信息', to='Customer')
+    customer = models.OneToOneField(verbose_name='客户信息', to='Customer',on_delete=models.CASCADE)
 
     username = models.CharField(verbose_name='用户名', max_length=32)
     password = models.CharField(verbose_name='密码', max_length=64)
@@ -234,19 +235,19 @@ class ChangeClass(models.Model):
     """
     转班记录
     """
-    origin_class = models.ForeignKey(verbose_name="原班级", to="ClassList", related_name='x1')
-    target_class = models.ForeignKey(verbose_name="目标班级", to="ClassList", related_name='x2')
+    origin_class = models.ForeignKey(verbose_name="原班级", to="ClassList", related_name='x1',on_delete=models.CASCADE)
+    target_class = models.ForeignKey(verbose_name="目标班级", to="ClassList", related_name='x2',on_delete=models.CASCADE)
     memo = models.TextField(verbose_name='原因')
-    user = models.ForeignKey(verbose_name='处理人', to='UserInfo')
+    user = models.ForeignKey(verbose_name='处理人', to='UserInfo',on_delete=models.CASCADE)
 
 
 class CourseRecord(models.Model):
     """
     上课记录表
     """
-    class_obj = models.ForeignKey(verbose_name="班级", to="ClassList")
+    class_obj = models.ForeignKey(verbose_name="班级", to="ClassList",on_delete=models.CASCADE)
     day_num = models.IntegerField(verbose_name="节次")
-    teacher = models.ForeignKey(verbose_name="讲师", to='UserInfo')
+    teacher = models.ForeignKey(verbose_name="讲师", to='UserInfo',on_delete=models.CASCADE)
     date = models.DateField(verbose_name="上课日期", auto_now_add=True)
 
     course_title = models.CharField(verbose_name='本节课程标题', max_length=64, blank=True, null=True)
@@ -260,8 +261,8 @@ class CourseRecord(models.Model):
 
 
 class StudyRecord(models.Model):
-    course_record = models.ForeignKey(verbose_name="第几天课程", to="CourseRecord")
-    student = models.ForeignKey(verbose_name="学员", to='Student')
+    course_record = models.ForeignKey(verbose_name="第几天课程", to="CourseRecord",on_delete=models.CASCADE)
+    student = models.ForeignKey(verbose_name="学员", to='Student',on_delete=models.CASCADE)
     record_choices = (
         ('checked', "已签到"),
         ('vacate', "请假"),

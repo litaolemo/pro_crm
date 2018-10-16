@@ -35,5 +35,5 @@ class StudyRecordConfig(StarkConfig):
         formset = model_formset_cls(data=request.POST)
         if formset.is_valid():
             formset.save()
-            return redirect('/stark/crm/studyrecord/list/?ccid=%s' %ccid )
+            return redirect('/stark/crm/studyrecord/list/?ccid=%s' %ccid)
         return render(request, 'study_record.html', {'formset': formset})
